@@ -1,0 +1,26 @@
+Metric,Value
+Name,E1VFVN30 ETF
+Observations,2536
+Period,2014-10-07 to 2024-12-31
+Ann. Return (%),10.32
+Ann. Volatility (%),21.05
+Sharpe Ratio,0.49
+Skewness,-0.414
+Excess Kurtosis,4.545
+Jarque-Bera p-value,0.0
+VaR 95% Historical (%),2.067
+VaR 99% Historical (%),4.335
+VaR 95% Parametric (%),2.14
+VaR 99% Parametric (%),3.043
+VaR 95% Monte Carlo (%),2.153
+CVaR 95% Historical (%),3.379
+CVaR 99% Historical (%),5.378
+CVaR 95% Parametric (%),2.694
+Max Drawdown (%),-47.67
+Drawdown Start,2018-04-09
+Drawdown End,2020-03-30
+Recovery Date,2021-01-11
+Drawdown Duration (days),721
+Recovery Duration (days),287
+Avg Drawdown (%),-15.28
+% Time in Drawdown,94.91
