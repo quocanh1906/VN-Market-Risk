@@ -144,6 +144,7 @@ def rolling_volatility(returns, window=21):
     vol.name = f"Vol_{window}d"
     return vol
 
+
 # ── Drawdown Analysis ───────────────────────────────────────────────────────────
 
 def compute_drawdowns(returns):

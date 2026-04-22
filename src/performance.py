@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -245,3 +246,91 @@ if __name__ == "__main__":
     plot_risk_dashboard(returns, drawdown, r_var, r_vol)
     plot_var_comparison(returns)
     plot_stress_results(hist_stress)
+
+def plot_volatility_comparison(returns, ewma_vol, garch_vol, simple_vol):
+    """
+    Compare three volatility models side by side:
+    - Simple historical (constant)
+    - EWMA (reactive)
+    - GARCH (reactive + mean reverting)
+    """
+def plot_volatility_comparison(returns, ewma_vol, garch_vol):
+    """
+    Compare three volatility models:
+    - Simple historical (constant)
+    - EWMA (reactive)
+    - GARCH (reactive + mean reverting)
+    """
+    simple_vol = returns.std() * np.sqrt(252)
+
+    fig, axes = plt.subplots(2, 1, figsize=(14, 8))
+    fig.suptitle("Volatility Model Comparison — E1VFVN30 (2014-2024)",
+                 fontsize=13, fontweight="bold")
+
+    # ── Panel 1: Volatility comparison ─────────────────────────────────────────
+    ax = axes[0]
+    ax.axhline(y=simple_vol * 100, color="grey", linestyle="--",
+               linewidth=1.5, label=f"Historical: {simple_vol*100:.1f}% (constant)")
+    ax.plot(ewma_vol.index, ewma_vol.values * 100,
+            color="steelblue", linewidth=1.2, label="EWMA (λ=0.94)")
+    if garch_vol is not None:
+        ax.plot(garch_vol.index, garch_vol.values * 100,
+                color="darkorange", linewidth=1.2, label="GARCH(1,1)")
+
+    # Shade crisis periods
+    crises = [
+        ("2015-06-01", "2015-09-30", "China"),
+        ("2018-04-01", "2018-10-31", "Trade War"),
+        ("2020-01-20", "2020-03-30", "COVID"),
+        ("2022-04-01", "2022-11-30", "VN Crash"),
+    ]
+    for start, end, label in crises:
+        ax.axvspan(pd.Timestamp(start), pd.Timestamp(end),
+                   alpha=0.1, color="red")
+
+    ax.set_ylabel("Annualised Volatility (%)")
+    ax.set_title("Volatility: Historical vs EWMA vs GARCH")
+    ax.legend(fontsize=9)
+    ax.grid(alpha=0.3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+
+    # ── Panel 2: Dynamic VaR comparison ────────────────────────────────────────
+    ax = axes[1]
+
+    # Import VaR functions
+    sys.path.insert(0, "src")
+    from volatility import var_ewma, var_garch
+    from risk import var_historical
+
+    # Rolling historical VaR
+    roll_var = returns.rolling(252).apply(
+        lambda x: var_historical(pd.Series(x), 0.95), raw=False
+    )
+
+    # EWMA and GARCH VaR
+    ewma_var_series  = var_ewma(returns, confidence=0.95)
+    garch_var_series, _ = var_garch(returns, confidence=0.95)
+
+    ax.plot(roll_var.index, roll_var.values * 100,
+            color="grey", linewidth=1.2, linestyle="--",
+            label="Rolling Historical VaR 95%")
+    ax.plot(ewma_var_series.index, ewma_var_series.values * 100,
+            color="steelblue", linewidth=1.2,
+            label="EWMA VaR 95%")
+    if garch_var_series is not None:
+        ax.plot(garch_var_series.index, garch_var_series.values * 100,
+                color="darkorange", linewidth=1.2,
+                label="GARCH VaR 95%")
+
+    ax.set_ylabel("VaR (%)")
+    ax.set_title("Dynamic VaR: Rolling Historical vs EWMA vs GARCH")
+    ax.legend(fontsize=9)
+    ax.grid(alpha=0.3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+
+    plt.tight_layout()
+    os.makedirs("output", exist_ok=True)
+    plt.savefig("output/volatility_comparison.png", dpi=150,
+                bbox_inches="tight")
+    plt.show()
+    print("Saved to output/volatility_comparison.png")
